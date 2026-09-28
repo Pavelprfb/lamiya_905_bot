@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <title>Lamiya — Telegram Login</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="brand">
+        <div class="brand__mark" aria-hidden="true">✈️</div>
+        <h1 class="brand__title">Lamiya Login</h1>
+        <p class="brand__subtitle">Sign in with the phone number on your Telegram account.</p>
+      </header>
+
+      <div id="alert" class="alert" role="alert" hidden></div>
+
+      <!-- Step 1 — phone number -->
+      <section id="screen-phone" class="card" aria-labelledby="phone-heading">
+        <h2 id="phone-heading" class="card__title">Enter your phone number</h2>
+        <p class="card__hint">We will send a one-time login code to your Telegram app.</p>
+
+        <form id="phone-form" novalidate>
+          <div class="field">
+            <label class="field__label" for="country">Country</label>
+            <div class="select-wrap">
+              <select id="country" name="country" autocomplete="country" aria-describedby="detected-hint"></select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="phone">Phone number</label>
+            <input
+              id="phone"
+              name="phone"
+              class="input"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="+880 1XXX-XXXXXX"
+              enterkeyhint="go"
+              aria-describedby="detected-hint"
+              required
+            />
+            <p id="detected-hint" class="field__hint" aria-live="polite"></p>
+          </div>
+
+          <button id="phone-submit" class="btn btn--primary" type="submit">
+            <span class="btn__label">Send login code</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Step 2 — OTP / 2FA password -->
+      <section id="screen-code" class="card" aria-labelledby="code-heading" hidden>
+        <h2 id="code-heading" class="card__title">Enter the login code</h2>
+        <p id="code-hint" class="card__hint"></p>
+
+        <form id="code-form" novalidate>
+          <div class="field">
+            <label class="field__label" for="code">Login code</label>
+            <input
+              id="code"
+              name="code"
+              class="input input--code"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              placeholder="• • • • •"
+              maxlength="6"
+              enterkeyhint="go"
+              required
+            />
+            <p class="field__hint">Open Telegram → Settings → Devices → Active Sessions to read the code.</p>
+          </div>
+
+          <div class="field" id="password-field" hidden>
+            <label class="field__label" for="password">Two-step verification password</label>
+            <input
+              id="password"
+              name="password"
+              class="input"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Your Telegram cloud password"
+              enterkeyhint="go"
+            />
+            <p id="password-hint" class="field__hint"></p>
+          </div>
+
+          <button id="code-submit" class="btn btn--primary" type="submit">
+            <span class="btn__label">Verify and continue</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+
+          <div class="row">
+            <button id="resend-btn" class="btn btn--ghost" type="button">Resend code</button>
+            <button id="change-btn" class="btn btn--ghost" type="button">Change number</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Step 3 — done -->
+      <section id="screen-done" class="card card--center" aria-labelledby="done-heading" hidden>
+        <div class="done__icon" aria-hidden="true">✅</div>
+        <h2 id="done-heading" class="card__title">You are signed in</h2>
+        <p id="done-hint" class="card__hint">Taking you to the website…</p>
+        <a id="continue-link" class="btn btn--primary" href="#" rel="noopener">Continue</a>
+      </section>
+
+      <footer class="foot">
+        <span id="user-chip" class="foot__user"></span>
+      </footer>
+    </main>
+
+    <script src="/assets/app.js" defer></script>
+  </body>
+</html>

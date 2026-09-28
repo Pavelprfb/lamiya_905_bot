@@ -1,0 +1,27 @@
+{
+  "name": "lamiya-telegram-webapp-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram WebApp login bot (phone + OTP) with GramJS session storage, Express backend and static frontend served by a single Node server in Docker.",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "check": "node --check src/index.js && node --check public/assets/app.js && node --check src/services/telegram-auth.js && node --check src/routes/auth.js",
+    "smoke": "node scripts/smoke-test.js",
+    "test:routes": "node scripts/route-test.js",
+    "test:http": "node scripts/http-test.js",
+    "test:live": "node scripts/live-telegram-test.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "telegraf": "^4.16.3",
+    "telegram": "2.26.22"
+  }
+}

@@ -1,0 +1,34 @@
+# Dependencies are reinstalled inside the image
+node_modules
+npm-debug.log*
+yarn-error.log*
+
+# Secrets never belong in the build context
+.env
+.env.*
+!.env.example
+
+# Session files must stay in the mounted volume, never in the image
+data
+*.session
+sessions
+
+# VCS / editor / OS noise
+.git
+.gitignore
+.github
+.vscode
+.idea
+*.md
+!README.md
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+logs
+*.log
+coverage
+tmp
+tmp-*
+.DS_Store
+Thumbs.db

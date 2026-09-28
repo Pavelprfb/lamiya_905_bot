@@ -1,0 +1,44 @@
+name: lamiya-telegram-webapp
+
+services:
+  webapp-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lamiya-telegram-webapp:latest
+    container_name: lamiya-webapp-bot
+    restart: unless-stopped
+
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATA_DIR: /app/data
+      PORT: 3000
+
+    ports:
+      - "${PORT:-3000}:3000"
+
+    volumes:
+      # Named volume: sessions and the index survive restarts and rebuilds.
+      - telegram-sessions:/app/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  telegram-sessions:
+    driver: local
