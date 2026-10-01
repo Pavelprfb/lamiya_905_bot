@@ -32,7 +32,18 @@ function requireTelegramAuth(config) {
       next();
     } catch (err) {
       const known = err instanceof InitDataError;
-      logger.warn(`Rejected a WebApp request: ${known ? err.code : 'unknown_error'}`);
+      if (known && err.details) {
+        // Never the payload or hash: only the field names plus the owning
+        // bot id, which is what makes a token mismatch diagnosable.
+        const { fields, receiver, authDate, payloadBytes } = err.details;
+        logger.warn(
+          `Rejected a WebApp request: ${err.code} `
+          + `(fields=${fields} receiver=${receiver ?? 'none'} `
+          + `auth_date=${authDate ?? 'none'} bytes=${payloadBytes})`,
+        );
+      } else {
+        logger.warn(`Rejected a WebApp request: ${known ? err.code : 'unknown_error'}`);
+      }
       res.status(401).json({
         ok: false,
         error: known ? err.code : 'unauthorized',

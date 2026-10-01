@@ -194,6 +194,38 @@ Telegram hiccup would silently wipe every stored session.
   same way. The exact version is pinned by `package-lock.json`, and the Docker
   build uses `npm ci`, so deployments are reproducible.
 
+### Troubleshooting `init_data_signature_invalid`
+
+This error means the signature on `initData` does not match `BOT_TOKEN`. The
+verification code itself is not at fault, so it is nearly always a setup
+mismatch. On failure the server logs one line naming the fields and, when
+present, the owning bot's id:
+
+```
+WARN  Rejected a WebApp request: init_data_signature_invalid
+      (fields=auth_date,hash,query_id,receiver,user receiver=8969566908 ...)
+```
+
+Check in this order:
+
+1. **`receiver` is a different bot id than the one in your startup log.** The
+   WebApp is signed by whichever bot owns it in BotFather. This happens when the
+   WebApp was created under a different bot than the one whose token is in
+   `.env`, or when the token was regenerated. Re-create the WebApp under this
+   bot, or put the owning bot's token in `.env`.
+2. **The URL you open is the wrong host.** The WebApp must be registered with
+   the exact URL Telegram is loading, including scheme and any subdomain.
+3. **A proxy altered the header.** If a reverse proxy rewrites, compresses or
+   drops `X-Telegram-Init-Data`, the bytes no longer match the signature. Pass
+   the header through untouched and do not rewrite the request body.
+
+The bot username and id are logged at startup, so you can confirm at a glance
+which bot the server thinks it is:
+
+```
+INFO  Telegram bot token is valid (@lamiya_905_bot, id 8969566908)
+```
+
 ---
 
 ## Tests

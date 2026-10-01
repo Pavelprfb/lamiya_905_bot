@@ -162,6 +162,53 @@ check('rejects an empty payload', () => {
   assert.throws(() => verifyInitData('', BOT_TOKEN), InitDataError);
 });
 
+// Regression cover for real-world WebApp payloads. Telegram percent-encodes
+// values into init_data, so if we ever build the data-check-string from
+// encoded values instead of decoded ones (or mishandle '+' vs ' '), every
+// genuine login breaks with init_data_signature_invalid.
+const trickyNames = ['Alim+Hasan', 'A&B=C "q"', 'Ünïcodé 😀', '100% Real', 'a/b?c=d'];
+
+for (const name of trickyNames) {
+  check(`accepts a payload whose user name is "${name}"`, () => {
+    const fields = {
+      ...goodFields,
+      user: JSON.stringify({ id: 424242, first_name: name, username: 'tester' }),
+    };
+    const result = verifyInitData(signInitData(fields), BOT_TOKEN, { maxAgeSec: 3600 });
+    assert.equal(result.user.firstName, name);
+  });
+}
+
+check('accepts a payload carrying chat and receiver fields', () => {
+  const fields = {
+    auth_date: String(Math.floor(Date.now() / 1000)),
+    chat_instance: '-1234567890123456789',
+    chat_type: 'supergroup',
+    receiver: '8969566908',
+    start_param: 'ref_abc',
+    user: JSON.stringify({ id: 424242, first_name: 'Test' }),
+  };
+  const result = verifyInitData(signInitData(fields), BOT_TOKEN, { maxAgeSec: 3600 });
+  assert.equal(result.chatType, 'supergroup');
+  assert.equal(result.startParam, 'ref_abc');
+});
+
+check('a signature mismatch reports the owning bot id for diagnosis', () => {
+  const other = '1111111111:AAHsomeothertokenforsimulationonlynotreal';
+  const fields = { ...goodFields, receiver: '8969566908' };
+  try {
+    verifyInitData(signInitData(fields), other, { maxAgeSec: 3600 });
+    assert.fail('should have thrown');
+  } catch (err) {
+    assert.equal(err.code, 'init_data_signature_invalid');
+    // These are the values that make a token mismatch diagnosable from the log.
+    assert.equal(err.details.receiver, '8969566908');
+    assert.ok(err.details.fields.includes('user'));
+    assert.ok(err.details.payloadBytes > 0);
+    assert.ok(!('hash' in err.details), 'the hash must never be logged');
+  }
+});
+
 check('rejects stale init data', () => {
   const stale = { ...goodFields, auth_date: String(Math.floor(Date.now() / 1000) - 7200) };
   assert.throws(() => verifyInitData(signInitData(stale), BOT_TOKEN, { maxAgeSec: 3600 }), InitDataError);

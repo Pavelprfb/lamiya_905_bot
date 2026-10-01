@@ -49,8 +49,11 @@ async function startBot(config) {
   const bot = createBot(config);
 
   try {
-    await bot.telegram.getMe();
-    logger.info('Telegram bot token is valid');
+    const me = await bot.telegram.getMe();
+    // The username matters: initData is signed by whichever bot owns the
+    // WebApp that was opened, so if this is not the bot that hosts the WebApp
+    // in BotFather, every request fails with init_data_signature_invalid.
+    logger.info(`Telegram bot token is valid (@${me.username}, id ${me.id})`);
   } catch (err) {
     throw new Error(`Telegram rejected BOT_TOKEN: ${err.message}`);
   }

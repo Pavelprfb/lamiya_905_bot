@@ -3,10 +3,11 @@
 const crypto = require('node:crypto');
 
 class InitDataError extends Error {
-  constructor(code, message) {
+  constructor(code, message, details) {
     super(message);
     this.name = 'InitDataError';
     this.code = code;
+    this.details = details;
   }
 }
 
@@ -63,7 +64,22 @@ function verifyInitData(rawInitData, botToken, { maxAgeSec = 86400, now = Date.n
   const secretKey = hmac('WebAppData', botToken);
   const expected = hmac(secretKey, dataCheckString).toString('hex');
   if (!safeEqual(expected, hash)) {
-    throw new InitDataError('init_data_signature_invalid', 'Telegram init data signature is invalid.');
+    // The signature is computed by whichever bot owns the WebApp that was
+    // opened, so a mismatch means the token we hold belongs to a different
+    // bot (or the payload was altered in transit). `receiver` carries the
+    // owning bot's id for WebApps opened from a keyboard button, which makes
+    // the two cases tellable apart. Never log the payload or the hash itself.
+    const details = {
+      fields: Object.keys(fields).sort().join(','),
+      receiver: fields.receiver || null,
+      authDate: fields.auth_date || null,
+      payloadBytes: Buffer.byteLength(rawInitData, 'utf8'),
+    };
+    throw new InitDataError(
+      'init_data_signature_invalid',
+      'Telegram init data signature is invalid.',
+      details,
+    );
   }
 
   const authDate = Number.parseInt(fields.auth_date, 10);
