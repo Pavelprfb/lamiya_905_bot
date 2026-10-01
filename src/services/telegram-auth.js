@@ -1,12 +1,12 @@
 'use strict';
 
-const { Api, TelegramClient } = require('telegram');
-const { StringSession } = require('telegram/sessions');
-const { computeCheck } = require('telegram/Password');
+const { Api, TelegramClient } = require('teleproto');
+const { StringSession } = require('teleproto/sessions');
+const { computeCheck } = require('teleproto/Password');
 
 const logger = require('../logger');
 
-/** GramJS talks to `baseLogger`; we keep it quiet and log on our own terms. */
+/** teleproto talks to `baseLogger`; we keep it quiet and log on our own terms. */
 const SILENT_LOGGER = {
   levels: ['error', 'warn', 'info', 'debug'],
   canSend: () => false,
@@ -54,7 +54,7 @@ const RPC_ERROR_MAP = {
   SESSION_REVOKED: ['session_revoked', 'Telegram revoked this session, please log in again.'],
   AUTH_KEY_UNREGISTERED: ['session_revoked', 'The saved session is no longer valid, please log in again.'],
   AUTH_KEY_DUPLICATED: ['transport_error', 'Telegram transport hiccup, please retry.'],
-  // GramJS normalises FLOOD_WAIT_<n> to a FloodWaitError whose errorMessage
+  // teleproto normalises FLOOD_WAIT_<n> to a FloodWaitError whose errorMessage
   // is the bare word "FLOOD", so the plain names are needed too.
   FLOOD: ['flood', 'Telegram asked us to slow down, please try again in a moment.'],
   FLOOD_PREMIUM: ['flood', 'Telegram asked us to slow down, please try again in a moment.'],
@@ -97,7 +97,7 @@ class TelegramAuthService {
   }
 
   #createClient(session = '') {
-    // GramJS logs to stdout on its own; swap in a silent logger and route every
+    // teleproto logs to stdout on its own; swap in a silent logger and route every
     // message we care about through src/logger.js instead.
     const client = new TelegramClient(new StringSession(session), this.#config.apiId, this.#config.apiHash, {
       connectionRetries: 2,
@@ -161,7 +161,7 @@ class TelegramAuthService {
     }
   }
 
-  /** Exchange the OTP for an authorized GramJS session. */
+  /** Exchange the OTP for an authorized teleproto session. */
   async completeLogin(attempt, { code, password } = {}) {
     const client = attempt.client;
     if (!client || !attempt.phoneCodeHash) {

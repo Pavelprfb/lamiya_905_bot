@@ -5,7 +5,7 @@ A single Node.js server that runs three things together:
 1. a **Telegraf bot** (`/start`, `/login`, inline *Open App* button),
 2. a **Telegram Mini App** that collects a phone number and the login code
    Telegram sends to that phone, and
-3. a **GramJS login service** that exchanges the code for a reusable
+3. a **teleproto login service** that exchanges the code for a reusable
    `StringSession`, stores it on disk, and then sends the user to
    `https://p9x9.com`.
 
@@ -17,7 +17,7 @@ WebApp, the API and the healthcheck from one process.
 ## How the login works
 
 ```
-User                WebApp (browser)        Express API             GramJS / Telegram
+User                WebApp (browser)        Express API           teleproto / Telegram
  |                        |                      |                        |
  |-- opens bot ---------->|                      |                        |
  |                        |-- GET  /api/auth/status ------------------->  |
@@ -164,7 +164,7 @@ Rate limits are per Telegram user, not per IP: 8 code sends and 20 verifies per
 data/
 ├── index.json                    # version, byPhone, byOwner
 └── sessions/
-    └── 8801712345678.session     # "1" + base64 GramJS StringSession
+    └── 8801712345678.session     # "1" + base64 teleproto StringSession
 ```
 
 Writes go to a temp file and are renamed into place, and all index mutations
@@ -188,8 +188,11 @@ Telegram hiccup would silently wipe every stored session.
   cannot be framed anywhere else.
 - 2FA is fully supported (`auth.checkPassword`); signup for unregistered
   numbers is deliberately not, this portal only signs in existing accounts.
-- `telegram` (GramJS) is pinned to `2.26.22`; the package is deprecated
-  upstream in favour of Teleproto, so the version is pinned rather than ranged.
+- MTProto access uses **`teleproto`**, the actively maintained continuation of
+  GramJS (the `telegram` package is archived upstream). It is a drop-in
+  successor, so `new TelegramClient(...)`, `Api.*` and `StringSession` work the
+  same way. The exact version is pinned by `package-lock.json`, and the Docker
+  build uses `npm ci`, so deployments are reproducible.
 
 ---
 
@@ -205,7 +208,7 @@ npm run test:live    # talks to real Telegram with a deliberately invalid number
 
 `npm run smoke` and `npm run test:routes` run fully offline and need no
 credentials — the latter mounts the real router, session store and attempt
-store on a throwaway Express app and fakes only the GramJS service, which is
+store on a throwaway Express app and fakes only the MTProto service, which is
 what covers ownership isolation, session reuse and 2FA recovery.
 
 `npm run test:http` expects the server on `http://127.0.0.1:<PORT>`; start it
@@ -226,11 +229,11 @@ src/
 ├── app.js                   Express app, helmet/CSP, static, /healthz
 ├── bot.js                   Telegraf commands and menu button
 ├── config.js                env parsing and validation
-├── logger.js                console logger (GramJS is silenced)
+├── logger.js                console logger (teleproto is silenced)
 ├── middleware/              init-data auth, rate limits, error handler
 ├── routes/auth.js           /api/auth/*
 ├── services/
-│   ├── telegram-auth.js     GramJS send/resend/sign-in/2FA/verify
+│   ├── telegram-auth.js     MTProto send/resend/sign-in/2FA/verify
 │   ├── session-store.js     durable StringSession files + indexes
 │   └── login-attempts.js    in-flight OTP state, TTL, per-phone lock
 └── utils/                   phone normalisation, init-data HMAC

@@ -5,7 +5,7 @@
  *
  *   node scripts/live-telegram-test.js
  *
- * It proves the GramJS wiring works (connect -> auth.sendCode -> error mapping)
+  * It proves the teleproto wiring works (connect -> auth.sendCode -> error mapping)
  * without ever delivering a login code to anybody: the number below is rejected
  * by Telegram as invalid.
  */

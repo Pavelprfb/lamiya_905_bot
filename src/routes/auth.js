@@ -179,7 +179,7 @@ function createAuthRouter({ config, sessionStore, authService, attempts }) {
     });
   }));
 
-  // Step 2: the OTP (and, when 2FA is on, the password) -> a stored GramJS session.
+  // Step 2: the OTP (and, when 2FA is on, the password) -> a stored MTProto session.
   router.post('/verify', auth, limiters.verifyCode, asyncHandler(async (req, res) => {
     const { attemptId, code, password } = req.body || {};
     if (!attemptId || typeof attemptId !== 'string') {

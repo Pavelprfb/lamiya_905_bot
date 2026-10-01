@@ -11,11 +11,11 @@ const SESSION_SUFFIX = '.session';
 const INDEX_VERSION = 2;
 
 /**
- * Filesystem-backed store for GramJS StringSession blobs.
+ * Filesystem-backed store for teleproto StringSession blobs.
  *
  * Layout (DATA_DIR, mounted as a Docker volume):
- *   data/index.json                  -> { version, byPhone: {…}, byOwner: {…} }
- *   data/sessions/<digits>.session   -> GramJS StringSession string
+ *   data/index.json                  -> { version, byPhone, byOwner }
+ *   data/sessions/<digits>.session   -> teleproto StringSession string
  *
  * Two different Telegram identities matter here and must not be conflated:
  *   telegramUserId     the account that owns the phone number being signed in
@@ -109,7 +109,7 @@ class SessionStore {
     if (!meta) return null;
     const session = this.#readSessionFile(phoneDigits);
     if (!session) return null;
-    // GramJS writes `StringSession.save()` as "1" + standard base64. Anything
+    // teleproto writes `StringSession.save()` as "1" + standard base64. Anything
     // else means an interrupted write and would throw on the next read.
     if (!/^1[A-Za-z0-9+/]+={0,2}$/.test(session)) return null;
     return { session, meta };

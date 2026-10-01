@@ -16,7 +16,7 @@ const { LoginAttemptStore } = require('../src/services/login-attempts');
 const BOT_TOKEN = '1234567890:AAHtesttesttesttesttesttesttesttesttesttest';
 
 /**
- * Build a real GramJS StringSession string the same way StringSession.save()
+ * Build a real teleproto StringSession string the same way StringSession.save()
  * does: "1" + base64(dcId, addrLen, address, port, 256-byte auth key).
  */
 function buildStringSession({ dcId = 2, address = '149.154.167.51', port = 443 } = {}) {
@@ -190,8 +190,8 @@ check('rejects stale init data', () => {
     assert.equal(stored.session, REAL_SESSION);
     assert.equal(stored.meta.telegramUserId, '999000111');
   });
-  check('GramJS can parse what we stored', () => {
-    const { StringSession } = require('telegram/sessions');
+  check('teleproto can parse what we stored', () => {
+    const { StringSession } = require('teleproto/sessions');
     const parsed = new StringSession(stored.session);
     assert.equal(parsed.dcId, 2);
     assert.equal(parsed.serverAddress, '149.154.167.51');

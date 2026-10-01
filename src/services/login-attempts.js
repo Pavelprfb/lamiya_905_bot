@@ -30,7 +30,7 @@ class KeyedLock {
 /**
  * In-memory state for OTP logins that are mid-flight.
  *
- * Each attempt owns a live (but not yet authorized) GramJS client, because the
+ * Each attempt owns a live (but not yet authorized) MTProto client, because the
  * MTProto connection that requested the code is the one that must consume it.
  * Attempts are disposable: nothing sensitive but the phone number and the
  * phoneCodeHash is kept, and everything is wiped on TTL expiry or on success.
